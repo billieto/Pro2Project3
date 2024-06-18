@@ -4,6 +4,7 @@
 typedef unsigned char byte;
 typedef unsigned short int word;
 typedef unsigned int dword;
+typedef short int sword;
 
 #define BYTE_SIZE sizeof(byte)
 #define WORD_SIZE sizeof(word)

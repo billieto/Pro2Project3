@@ -96,16 +96,19 @@ void list(void)
 
 void reverse(char *output)
 {
-    dword i = 0;
+    dword i = 0, frames = wav.data.subchunk2Size / wav.fmt.blockAlign;
     dword j = 0;
-    dword temp, left, right;
+    byte *temp = (byte*) malloc(wav.fmt.blockAlign);
 
-    for(i = 0; i < wav.data.subchunk2Size / 2; i++)
+    for(i = 0; i < frames / 2; i++)
     {
-        temp = wav.data.data[i];
-        wav.data.data[i] = wav.data.data[wav.data.subchunk2Size - i - 1];
-        wav.data.data[wav.data.subchunk2Size - i - 1] = temp;
+        j = frames - i - 1;
+        memcpy(temp, &wav.data.data[i * wav.fmt.blockAlign], wav.fmt.blockAlign);
+        memcpy(&wav.data.data[i * wav.fmt.blockAlign], &wav.data.data[j * wav.fmt.blockAlign], wav.fmt.blockAlign);
+        memcpy(&wav.data.data[j * wav.fmt.blockAlign], temp, wav.fmt.blockAlign);
     }
+    
+    free(temp);
 
     write_header(wav, output);
 }
