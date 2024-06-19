@@ -35,7 +35,7 @@ void read_header(char *filename)
     fclose(audio);
 }
 
-void write_header(WAV new, char *filename)
+void write_header(char *filename)
 {
     FILE *audio;
 
@@ -43,25 +43,25 @@ void write_header(WAV new, char *filename)
     check_file(audio);
 
     // riff chunk
-    fwrite(&new.riff.chunkID, DWORD_SIZE, 1, audio);
-    fwrite(&new.riff.chunkSize, DWORD_SIZE, 1, audio);
-    fwrite(&new.riff.format, DWORD_SIZE, 1, audio);
+    fwrite(&wav.riff.chunkID, DWORD_SIZE, 1, audio);
+    fwrite(&wav.riff.chunkSize, DWORD_SIZE, 1, audio);
+    fwrite(&wav.riff.format, DWORD_SIZE, 1, audio);
 
     // fmt subchunk
-    fwrite(&new.fmt.subchunk1ID, DWORD_SIZE, 1, audio);
-    fwrite(&new.fmt.subchunk1Size, DWORD_SIZE, 1, audio);
-    fwrite(&new.fmt.audioFormat, WORD_SIZE, 1, audio);
-    fwrite(&new.fmt.numChannels, WORD_SIZE, 1, audio);
-    fwrite(&new.fmt.sampleRate, DWORD_SIZE, 1, audio);
-    fwrite(&new.fmt.byteRate, DWORD_SIZE, 1, audio);
-    fwrite(&new.fmt.blockAlign, WORD_SIZE, 1, audio);
-    fwrite(&new.fmt.bitsPerSample, WORD_SIZE, 1, audio);
+    fwrite(&wav.fmt.subchunk1ID, DWORD_SIZE, 1, audio);
+    fwrite(&wav.fmt.subchunk1Size, DWORD_SIZE, 1, audio);
+    fwrite(&wav.fmt.audioFormat, WORD_SIZE, 1, audio);
+    fwrite(&wav.fmt.numChannels, WORD_SIZE, 1, audio);
+    fwrite(&wav.fmt.sampleRate, DWORD_SIZE, 1, audio);
+    fwrite(&wav.fmt.byteRate, DWORD_SIZE, 1, audio);
+    fwrite(&wav.fmt.blockAlign, WORD_SIZE, 1, audio);
+    fwrite(&wav.fmt.bitsPerSample, WORD_SIZE, 1, audio);
 
     // data subchunk
-    fwrite(&new.data.subchunk2ID, DWORD_SIZE, 1, audio);
-    fwrite(&new.data.subchunk2Size, DWORD_SIZE, 1, audio);
-    fwrite(new.data.data, new.data.subchunk2Size, 1, audio);
-    free(new.data.data);
+    fwrite(&wav.data.subchunk2ID, DWORD_SIZE, 1, audio);
+    fwrite(&wav.data.subchunk2Size, DWORD_SIZE, 1, audio);
+    fwrite(wav.data.data, wav.data.subchunk2Size, 1, audio);
+    free(wav.data.data);
 
     fclose(audio);
 }
@@ -76,6 +76,7 @@ void list(void)
     printf("format: ");
     print_bytes(&wav.riff.format, DWORD_SIZE);
     putchar('\n');
+
     puts("FMT_SUBCHUNK_HEADER");
     puts("===================");
     printf("subchunk1ID: ");
@@ -87,6 +88,7 @@ void list(void)
     printf("byteRate: %d\n", wav.fmt.byteRate);
     printf("blockAlign: %d\n", wav.fmt.blockAlign);
     printf("bitsPerSample: %d\n\n", wav.fmt.bitsPerSample);
+
     puts("DATA_SUBCHUNK_HEADER");
     puts("====================");
     printf("subchunk2ID: ");
@@ -96,8 +98,7 @@ void list(void)
 
 void reverse(char *output)
 {
-    dword i = 0, frames = wav.data.subchunk2Size / wav.fmt.blockAlign;
-    dword j = 0;
+    dword i = 0, j = 0, frames = wav.data.subchunk2Size / wav.fmt.blockAlign;
     byte *temp = (byte*) malloc(wav.fmt.blockAlign);
 
     for(i = 0; i < frames / 2; i++)
@@ -110,19 +111,17 @@ void reverse(char *output)
     
     free(temp);
 
-    write_header(wav, output);
+    write_header(output);
 }
 
 void mono(char *output)
 {
-    FILE *mono;
 
-    mono = fopen(output, "wb");
-    check_file(mono);
+}
 
+void crop(char *output, int start, int end)
+{
 
-
-    fclose(mono);
 }
 
 void print_bytes(dword *var, dword size)
@@ -136,14 +135,6 @@ void print_bytes(dword *var, dword size)
         printf("%C", byte_ptr[i]);
     }
     putchar('\n');
-}
-
-dword swap_32bit(dword val)
-{
-    return ((val >> 24) & 0x000000FF) |
-           ((val >> 8)  & 0x0000FF00) |
-           ((val << 8)  & 0x00FF0000) |
-           ((val << 24) & 0xFF000000);
 }
 
 void check_file(FILE *wav)

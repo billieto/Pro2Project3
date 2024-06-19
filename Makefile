@@ -2,16 +2,23 @@ CC = gcc
 CFLAGS = -Wall -g
 OBJFLAGS = -c
 PROGRAM = yawn
-OBJECTS = main.c read.c
+SOURCES = main.c read.c
+OBJECTS = main.o read.o
 HEADERS = main.h read.h
+RM = rm -f
+
+default: all
 
 all: $(PROGRAM)
 
-$(PROGRAM): $(OBJECTS)
+$(PROGRAM): $(OBJECTS) $(HEADERS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(PROGRAM)
 
-main.o: main.c $(HEADERS)
-	$(CC) $(OBJFLAGS) main.c
+.c.o:
+	$(CC) $(CFLAGS) $(OBJFLAGS) $< -o $@
 
-read.o: read.c $(HEADERS)
-	$(CC) $(OBJFLAGS) read.c
+clean:
+	$(RM) $(PROGRAM) $(OBJECTS)
+
+run:
+	./$(PROGRAM) $(ARGS)
