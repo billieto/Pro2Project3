@@ -9,8 +9,8 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/yawn",
-            "args": ["-reverse", "chord.wav","chord_r.wav"], // chord.wav
-            //"args": ["-list", "evil_laughter.wav"],
+            "args": ["-mono", "evil_laughter.wav", "evil_laughter_m.wav"], // chord.wav
+            //"args": ["-crop", "music.wav", "5", "10", "music_c.wav"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
