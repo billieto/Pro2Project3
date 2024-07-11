@@ -9,6 +9,7 @@ typedef short int sword;
 #define BYTE_SIZE sizeof(byte)
 #define WORD_SIZE sizeof(word)
 #define DWORD_SIZE sizeof(dword)
+#define CHAR_SIZE sizeof(char)
 
 typedef struct RIFF_CHUNK_DESCRIPTOR
 {

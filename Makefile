@@ -19,6 +19,3 @@ $(PROGRAM): $(OBJECTS) $(HEADERS)
 
 clean:
 	$(RM) $(PROGRAM) $(OBJECTS)
-
-run:
-	./$(PROGRAM) $(ARGS)
