@@ -16,6 +16,7 @@ void read_header(char *filename)
     fread(&wav.riff.chunkID, DWORD_SIZE, 1, audio);
 
     temp = (char*) malloc(5 * CHAR_SIZE); // to check if the file is a wav file
+    check_malloc(temp);
     memcpy(temp, &wav.riff.chunkID, DWORD_SIZE); // i use memcpy insted of strdup or strcpy because BYTE is unsinged char and want to be sure
     temp[4] = '\0'; // to make it a string
     if(strcmp(temp, "RIFF"))
@@ -33,6 +34,7 @@ void read_header(char *filename)
     fread(&wav.riff.format, DWORD_SIZE, 1, audio);
 
     temp = (char*) malloc(5 * CHAR_SIZE); // to check if the file is a wav file
+    check_malloc(temp);
     memcpy(temp, &wav.riff.format, DWORD_SIZE);
     temp[4] = '\0'; // to make it a string
     if(strcmp(temp, "WAVE"))
@@ -50,6 +52,7 @@ void read_header(char *filename)
     fread(&wav.fmt.subchunk1ID, DWORD_SIZE, 1, audio);
 
     temp = (char*) malloc(5 * CHAR_SIZE); // to check if the file is a wav file
+    check_malloc(temp);
     memcpy(temp, &wav.fmt.subchunk1ID, DWORD_SIZE);
     temp[4] = '\0'; // to make it a string
     if(strcmp(temp, "fmt "))
@@ -95,6 +98,7 @@ void read_header(char *filename)
     fread(&wav.data.subchunk2ID, DWORD_SIZE, 1, audio);
 
     temp = (char*) malloc(5 * CHAR_SIZE); // to check if the file is a wav file
+    check_malloc(temp);
     memcpy(temp, &wav.data.subchunk2ID, DWORD_SIZE);
     temp[4] = '\0'; // to make it a string
     if(strcmp(temp, "data"))
@@ -110,6 +114,7 @@ void read_header(char *filename)
 
     fread(&wav.data.subchunk2Size, DWORD_SIZE, 1, audio);
     wav.data.data = (byte*) malloc(wav.data.subchunk2Size * BYTE_SIZE);
+    check_malloc(wav.data.data);
     fread(wav.data.data, wav.data.subchunk2Size, 1, audio);
 
     fclose(audio);
@@ -181,6 +186,8 @@ void reverse(char *output)
     dword i = 0, j = 0, frames = wav.data.subchunk2Size / wav.fmt.blockAlign; // frames is the number of samples in the audio
     byte *temp = (byte*) malloc(wav.fmt.blockAlign); // temporary allocation for the reversed audio
 
+    check_malloc(temp);
+
     for(i = 0; i < frames / 2; i++) // we only need to go through half of the audio to reverse it
     {
         j = frames - i - 1; // we have to start from the end of the audio
@@ -198,12 +205,62 @@ void reverse(char *output)
 
 void mono(char *output)
 {
-    
+    int sampleSize = wav.fmt.blockAlign / wav.fmt.numChannels; //calculate size of each sample in bytes
+    int numSamples = wav.data.subchunk2Size / wav.fmt.blockAlign; // calculate number of samples in stereo data
+    int i = 0, j = 0;
+    byte *monoData = (byte*) malloc(numSamples * sampleSize); //memory allocation for mono audio data
+
+    check_malloc(monoData);
+
+    for(i = 0; i < numSamples; i++) //loop for each sample
+    {
+       memcpy(&monoData[i * sampleSize], &wav.data.data[j], sampleSize); // Copy left channel data to monoData
+       j += wav.fmt.blockAlign; // move to next stereo sample by skipping the right channel
+    }
+
+    // Update the .WAV structure for mono outputs
+    wav.fmt.numChannels = 1;
+    wav.fmt.byteRate = wav.fmt.sampleRate * wav.fmt.numChannels * wav.fmt.bitsPerSample / 8;
+    wav.fmt.blockAlign = wav.fmt.numChannels * wav.fmt.bitsPerSample / 8;
+    wav.data.subchunk2Size /= 2; // Since we are discarding one channel we adjust subchunk2Size to reflect mono data size
+    free(wav.data.data); // free original stereo data
+    wav.data.data = monoData; // assign monodata to the wav struct
+
+    write_header(output); // Write the modified WAV file to output
 }
 
 void crop(char *output, int start, int end)
 {
+    // Calculate start and end positions in bytes
+    int startByte = start * wav.fmt.sampleRate * wav.fmt.numChannels * (wav.fmt.bitsPerSample / 8);
+    int endByte = end * wav.fmt.sampleRate * wav.fmt.numChannels * (wav.fmt.bitsPerSample / 8);
+    int numSamples = endByte - startByte; // Calculate the number of samples to crop
+    byte *croppedData = (byte *)malloc(numSamples);// Allocate memory for the cropped audio data
 
+    check_malloc(croppedData);
+
+    // Ensure start and end are within valid range
+    if(start > (wav.data.subchunk2Size / wav.fmt.byteRate))
+    {    
+        puts("Invalid argument");
+        puts("Please make sure you provide a valid start point within the files's duration");
+        exit(EXIT_FAILURE);
+    }
+    else if(end > (wav.data.subchunk2Size / wav.fmt.byteRate))
+    {
+        puts("Invalid argument");
+        puts("Please make sure provide a valid end point within the files's duration");
+        exit(EXIT_FAILURE);
+    }
+
+    memcpy(croppedData, &wav.data.data[startByte], numSamples); // Copy the cropped data from the original WAV data
+
+    // Update WAV structure fields
+    wav.data.subchunk2Size = numSamples;
+    free(wav.data.data);
+    wav.data.data = croppedData;
+
+    write_header(output);  // Write the modified WAV file to output
 }
 
 void print_bytes(dword *var, dword size)

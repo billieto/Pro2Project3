@@ -9,12 +9,11 @@ WAV wav;
 int main(int argc, char *argv[])
 {
     char *test;
-    int num;
 
     if(argc > 6)
     {
         puts("Too many arguments");
-        puts("Please provide a valid command as of below: ");
+        puts("Please make sure you provide a valid command as of below: ");
         puts("-list <filename>");
         puts("-reverse <input> <output>");
         puts("-mono <input> <output>");
@@ -25,7 +24,7 @@ int main(int argc, char *argv[])
     else if(argc < 3)
     {
         puts("Too few arguments");
-        puts("Please provide a valid command as of below: ");
+        puts("Please make sure you provide a valid command as of below: ");
         puts("-list <filename>");
         puts("-reverse <input> <output>");
         puts("-mono <input> <output>");
@@ -46,7 +45,7 @@ int main(int argc, char *argv[])
         else if((test = strstr(argv[2], ".wav")) == NULL)
         {
             puts("Invalid argument");
-            puts("Please provide a .wav file as an argument");
+            puts("Please make sure you provide a .wav file as an argument");
 
             return 1;
         }
@@ -71,14 +70,14 @@ int main(int argc, char *argv[])
         else if((test = strstr(argv[2], ".wav")) == NULL)
         {
             puts("Invalid argument");
-            puts("Please provide a .wav file as an argument");
+            puts("Please make sure provide a .wav file as an argument");
 
             return 1;
         }
         else if((test = strstr(argv[3], ".wav")) == NULL)
         {
             puts("Invalid argument");
-            puts("Please provide a .wav file as an argument");
+            puts("Please make sure provide a .wav file as an argument");
 
             return 1;
         }
@@ -103,14 +102,14 @@ int main(int argc, char *argv[])
         else if((test = strstr(argv[2], ".wav")) == NULL)
         {
             puts("Invalid argument");
-            puts("Please provide a .wav file as an input file");
+            puts("Please make sure you provide a .wav file as an input file");
 
             return 1;
         }
         else if((test = strstr(argv[3], ".wav")) == NULL)
         {
             puts("Invalid argument");
-            puts("Please provide a .wav file as an output file");
+            puts("Please make sure you provide a .wav file as an output file");
 
             return 1;
         }
@@ -143,28 +142,49 @@ int main(int argc, char *argv[])
         else if((test = strstr(argv[2], ".wav")) == NULL)
         {
             puts("Invalid argument");
-            puts("Please provide a .wav file as an input file");
+            puts("Please make sure you provide a .wav file as an input file");
 
             return 1;
         }
         else if((test = strstr(argv[5], ".wav")) == NULL)
         {
             puts("Invalid argument");
-            puts("Please provide a .wav file as an output file");
+            puts("Please make sure you provide a .wav file as an output file");
 
             return 1;
         }
-        else if((num = atoi(argv[3])) <= 0)
+        else if(atoi(argv[3]) == atoi(argv[4]))
         {
             puts("Invalid argument");
-            puts("Please provide a positive integer as the start time");
+            puts("Please make sure you provide a valid start and end time");
 
             return 1;
         }
-        else if((num = atoi(argv[4])) <= 0)
+        else if(atoi(argv[3]) < 0 && atoi(argv[4]) < 0)
         {
             puts("Invalid argument");
-            puts("Please provide a positive integer as the end time");
+            puts("Please make sure you provide a positive integer as the start and end time");
+
+            return 1;
+        }
+        else if(atoi(argv[3]) < 0)
+        {
+            puts("Invalid argument");
+            puts("Please make sure you provide a positive integer as the start time");
+
+            return 1;
+        }
+        else if(atoi(argv[4]) <= 0)
+        {
+            puts("Invalid argument");
+            puts("Please make sure you provide a positive integer as the end time");
+
+            return 1;
+        }
+        else if(atoi(argv[3]) >= atoi(argv[4]))
+        {
+            puts("Invalid argument");
+            puts("Please make sure you provide a a start time smaller than then end time");
 
             return 1;
         }
@@ -180,7 +200,7 @@ int main(int argc, char *argv[])
     else
     {
         puts("Invalid argument");
-        puts("Please provide a valid command as of below: ");
+        puts("Please make sure you provide a valid command as of below: ");
         puts("-list <filename>");
         puts("-reverse <input> <output>");
         puts("-mono <input> <output>");

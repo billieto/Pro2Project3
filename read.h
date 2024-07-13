@@ -14,5 +14,4 @@ void print_bytes(dword *var, dword size);
 void check_file(FILE *wav);
 void check_malloc(void *ptr);
 
-
 #endif
